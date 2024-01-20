@@ -30,6 +30,7 @@ If you need something more customized, you'll have to do that yourself.
 A list of `Repository` objects composed of:
 
 - `name` (string)
+- `owner` (string)
 - `archived` (bool)
 - `private` (bool)
 - `tpl_name` (string)
@@ -67,7 +68,8 @@ $ github-client -file examples/github.yaml -destroy
 If you want to quickly create any number of sequentially-named repositories, you can use the following simple program:
 
 ```
-$ go run tpl/configure.go -out test.yaml -n 100
+$ cd tpl
+$ go run configure.go -out test.yaml -n 100
 ```
 
 ### Parameters
@@ -79,14 +81,6 @@ $ go run tpl/configure.go -out test.yaml -n 100
 - `n`
     + The number of repositories to create in the given organization.
     + Defaults to 25.
-
-## Developing
-
-If you don't want to compile, you can use `go run`:
-
-```
-$ go run *.go -file examples/github.yaml
-```
 
 ## Acknowledgments
 

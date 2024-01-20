@@ -1,4 +1,4 @@
-module github.com/owls-nest-farm/github-client
+module github.com/btoll/github-client
 
 go 1.17
 

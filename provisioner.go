@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/google/go-github/v41/github"
@@ -34,10 +35,9 @@ func (p *Provisioner) ProcessConfig(organization Organization, destroy bool) {
 	var wg sync.WaitGroup
 	wg.Add(len(organization.Repositories))
 
-	// TODO: Ensure org name was given.
 	org, _, err := p.Organizations.Get(*organization.Name)
 	if err != nil {
-		panic(err)
+		fmt.Printf("[ERROR] Organization `%s` could not be found -- %s\n", *organization.Name, err)
 	}
 
 	for _, repository := range organization.Repositories {

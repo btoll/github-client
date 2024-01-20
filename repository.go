@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,6 +14,7 @@ type RepositoryService struct {
 
 type Repository struct {
 	Name          *string  `json:"name,omitempty" yaml:"name,omitempty"`
+	Owner         *string  `json:"owner,omitempty" yaml:"owner,omitempty"`
 	TplName       *string  `json:"tpl_name,omitempty" yaml:"tpl_name,omitempty"`
 	Archived      bool     `json:"archived,omitempty" yaml:"archived,omitempty"`
 	Collaborators []string `json:"collaborators,omitempty" yaml:"collaborators,omitempty"`
@@ -50,14 +52,19 @@ func (r *RepositoryService) Create(rc *RepositoryCtx) {
 		fmt.Printf("[ERROR] Repository `%s` could not be created, no template name\n", *rc.Repository.Name)
 		return
 	}
-	repo, _, err := r.provisioner.Client.Repositories.CreateFromTemplate(getContext(), *rc.Organization.Login, *rc.Repository.TplName, &github.TemplateRepoRequest{
+	err := r.IsTemplateRepository(rc)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	repo, _, err := r.provisioner.Client.Repositories.CreateFromTemplate(getContext(), r.GetTemplateRepositoryOwner(rc), *rc.Repository.TplName, &github.TemplateRepoRequest{
 		Name:  rc.Repository.Name,
 		Owner: rc.Organization.Login,
 	})
 	if err != nil {
 		fmt.Printf("[ERROR] Repository `%s` could not be created -- %s\n", *rc.Repository.Name, err)
 	} else {
-		fmt.Printf("[SUCCESS] Created repository `%s`\n", *rc.Repository.Name)
+		fmt.Printf("[SUCCESS] Created repository `%s` from template repository `%s`.\n", *rc.Repository.Name, *rc.Repository.TplName)
 
 		if rc.Repository.Archived {
 			b := true
@@ -78,8 +85,27 @@ func (r *RepositoryService) Delete(rc *RepositoryCtx) {
 	if err != nil {
 		fmt.Printf("[ERROR] Repository `%s` could not be deleted -- %s\n", *rc.Repository.Name, err)
 	} else {
-		fmt.Printf("[SUCCESS] Deleted repository `%s`\n", *rc.Repository.Name)
+		fmt.Printf("[SUCCESS] Deleted repository `%s`.\n", *rc.Repository.Name)
 	}
+}
+
+func (r *RepositoryService) GetTemplateRepositoryOwner(rc *RepositoryCtx) string {
+	if rc.Repository.Owner != nil {
+		return *rc.Repository.Owner
+	}
+	return *rc.Organization.Login
+}
+
+func (r *RepositoryService) IsTemplateRepository(rc *RepositoryCtx) error {
+	repo, _, err := r.provisioner.Client.Repositories.Get(getContext(), r.GetTemplateRepositoryOwner(rc), *rc.Repository.TplName)
+	if err != nil {
+		return errors.New(fmt.Sprintf("[ERROR] There was a problem accessing repository `%s` -- %s", *rc.Repository.Name, err))
+	} else {
+		if !*repo.IsTemplate {
+			return errors.New(fmt.Sprintf("[ERROR] The repository `%s` is not a template repository.", *rc.Repository.Name))
+		}
+	}
+	return nil
 }
 
 func (r *RepositoryService) Update(rc *RepositoryCtx, repository *github.Repository) {
