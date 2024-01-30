@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/google/go-github/v41/github"
+	"github.com/google/go-github/v57/github"
 )
 
 type BaseService struct {

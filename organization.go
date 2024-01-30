@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/google/go-github/v41/github"
+	"github.com/google/go-github/v57/github"
 )
 
 type OrganizationService struct {

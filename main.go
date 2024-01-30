@@ -17,7 +17,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/google/go-github/v41/github"
+	"github.com/google/go-github/v57/github"
 	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v2"
 )
@@ -44,6 +44,8 @@ func getOAuthClient() *http.Client {
 	if apiToken == "" || !isSet {
 		panic("[ERROR] Must set $GITHUB_TOKEN!")
 	}
+
+	// TODO: if a token is given, check if it's valid.
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: apiToken},

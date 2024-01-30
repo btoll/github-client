@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/go-github/v41/github"
+	"github.com/google/go-github/v57/github"
 )
 
 type RepositoryService struct {
