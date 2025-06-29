@@ -22,6 +22,7 @@ type GitHubClient struct {
 	Branch     string
 	Path       string
 	Message    string
+	Paginate   bool
 }
 
 func init() {

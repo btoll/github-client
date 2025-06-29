@@ -31,15 +31,26 @@ func GetCommit(g *GitHubClient, sha string) (*github.RepositoryCommit, error) {
 	return commit, err
 }
 
-func ListByOrg(g *GitHubClient, perPage,page int) ([]*github.Repository, error) {
+func ListByOrg(g *GitHubClient) ([]*github.Repository, error) {
 	options := &github.RepositoryListByOrgOptions{
-		Type: "all",
-		Sort: "full_name",
+		Type:      "all",
+		Sort:      "full_name",
+		Direction: "asc",
 	}
-	options.PerPage = perPage
-	options.Page = page
-	repos, _, err := client.Repositories.ListByOrg(ctx, g.Upstream, options)
-	return repos, err
+	var repos []*github.Repository
+	for true {
+		page, resp, err := client.Repositories.ListByOrg(ctx, g.Upstream, options)
+		if err != nil {
+			// Print something here so it's known an error occurred.
+			return repos, err
+		}
+		repos = append(repos, page...)
+		if !g.Paginate || resp.NextPage == 0 {
+			break
+		}
+		options.Page += 1
+	}
+	return repos, nil
 }
 
 func ListForks(g *GitHubClient) ([]*github.Repository, error) {
